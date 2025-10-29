@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Australian Surveillance</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: #c0392b;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+        }
+
+        .header-title .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #34495e;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        #login-screen {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .login-box {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-box h2 {
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .error-message {
+            background: #e74c3c;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        #admin-screen {
+            flex: 1;
+            display: none;
+            flex-direction: row;
+            overflow: hidden;
+        }
+
+        #admin-map {
+            flex: 1;
+            cursor: crosshair;
+        }
+
+        .admin-panel {
+            width: 400px;
+            background: #f8f9fa;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .admin-panel h3 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .info-box {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #27ae60;
+        }
+
+        .camera-form {
+            display: none;
+        }
+
+        .camera-form.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen">
+        <div class="login-box">
+            <h2>God Account Login</h2>
+            <div id="login-error" class="error-message" style="display:none;"></div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Screen -->
+    <div id="admin-screen">
+        <div id="admin-map"></div>
+
+        <div class="admin-panel">
+            <h3>Add New Camera</h3>
+            <div class="info-box">
+                <strong>Instructions:</strong>
+                <p style="margin-top: 0.5rem;">Click anywhere on the map to drop a pin and add a camera location.</p>
+            </div>
+
+            <div id="camera-form" class="camera-form">
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="form-location" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Camera Type</label>
+                    <select id="form-type" required>
+                        <option value="Traffic">Traffic</option>
+                        <option value="Public Safety">Public Safety</option>
+                        <option value="Transit">Transit</option>
+                        <option value="Retail">Retail</option>
+                        <option value="Parks">Parks</option>
+                        <option value="LPR">License Plate Recognition</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Owner</label>
+                    <input type="text" id="form-owner" placeholder="e.g., City of Perth" required>
+                </div>
+                <div class="form-group">
+                    <label>Coverage Type</label>
+                    <select id="form-coverage">
+                        <option value="360">360° Omnidirectional</option>
+                        <option value="directional">Directional</option>
+                    </select>
+                </div>
+                <div class="form-group" id="direction-group">
+                    <label>Direction (degrees, 0=North)</label>
+                    <input type="number" id="form-direction" min="0" max="359" placeholder="0-359">
+                </div>
+                <div class="form-group">
+                    <label>Purpose</label>
+                    <input type="text" id="form-purpose" placeholder="e.g., Traffic monitoring" required>
+                </div>
+                <div class="form-group">
+                    <label>Network</label>
+                    <input type="text" id="form-network" placeholder="e.g., Perth-Traffic-01">
+                </div>
+                <div class="form-group">
+                    <label>Suburb</label>
+                    <input type="text" id="form-suburb" placeholder="e.g., Perth CBD">
+                </div>
+                <button type="button" id="save-camera" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Save Camera</button>
+                <button type="button" id="cancel-camera" class="btn btn-secondary" style="width: 100%; margin-top: 0.5rem;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <header style="display: none;" id="admin-header">
+        <div class="header-title">
+            <h1>Admin Panel</h1>
+            <div class="subtitle">Australian Surveillance - Add Cameras</div>
+        </div>
+        <div class="header-user">
+            <span id="user-name"></span>
+            <button class="btn btn-secondary" id="logout-btn">Logout</button>
+        </div>
+    </header>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
