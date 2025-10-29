@@ -30,13 +30,15 @@ function setupCollapsibleSidebar() {
         /* Desktop: sidebar collapses to 0 width with transition */
         .sidebar {
             transition: width 0.3s ease, padding 0.3s ease !important;
-            overflow: hidden;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
         }
 
         .sidebar.hidden {
             width: 0 !important;
             padding: 0 !important;
             border-right: none !important;
+            overflow: hidden !important;
         }
 
         /* Hamburger button positioning adjustment */
