@@ -18,8 +18,15 @@ const cameraColors = {
     'AI Camera': '#00ff99'             // Turquoise - AI detection cameras
 };
 
-// Initialize map centered on Perth CBD
-const map = L.map('map').setView([-31.9505, 115.8605], 14);
+// Initialize map centered on Perth CBD with zoom controls in bottom-right
+const map = L.map('map', {
+    zoomControl: false // Disable default zoom control
+}).setView([-31.9505, 115.8605], 14);
+
+// Add zoom control to bottom-right
+L.control.zoom({
+    position: 'bottomright'
+}).addTo(map);
 
 // Add OpenStreetMap tiles
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
