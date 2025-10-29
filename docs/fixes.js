@@ -27,13 +27,25 @@ function setupCollapsibleSidebar() {
     // Add responsive styles
     const style = document.createElement('style');
     style.textContent = `
-        /* Desktop: sidebar slides left with transition */
+        /* Desktop: sidebar collapses to 0 width with transition */
         .sidebar {
-            transition: transform 0.3s ease !important;
+            transition: width 0.3s ease, padding 0.3s ease !important;
+            overflow: hidden;
         }
 
         .sidebar.hidden {
-            transform: translateX(-100%);
+            width: 0 !important;
+            padding: 0 !important;
+            border-right: none !important;
+        }
+
+        /* Hamburger button positioning adjustment */
+        #sidebar-toggle {
+            transition: left 0.3s ease;
+        }
+
+        .sidebar.hidden ~ #sidebar-toggle {
+            left: 10px;
         }
 
         /* Mobile: sidebar positioned fixed and off-screen by default */
@@ -42,10 +54,10 @@ function setupCollapsibleSidebar() {
                 position: fixed !important;
                 left: -320px !important;
                 top: 65px !important;
+                width: 320px !important;
                 height: calc(100vh - 65px) !important;
                 transition: left 0.3s ease !important;
                 z-index: 9998 !important;
-                transform: none !important;
             }
             .sidebar.open {
                 left: 0 !important;

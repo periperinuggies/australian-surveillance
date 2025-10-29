@@ -8,6 +8,14 @@ class GodMode {
         this.filteredCameras = [];
         this.currentCamera = null;
 
+        // Active filters
+        this.activeFilters = {
+            type: '',
+            owner: '',
+            network: '',
+            purpose: ''
+        };
+
         this.initElements();
         this.attachEventListeners();
 
@@ -53,6 +61,24 @@ class GodMode {
 
         // Search
         this.searchInput.addEventListener('input', () => this.filterCameras());
+
+        // Filter dropdowns
+        document.getElementById('god-filter-type').addEventListener('change', (e) => {
+            this.activeFilters.type = e.target.value;
+            this.filterCameras();
+        });
+        document.getElementById('god-filter-owner').addEventListener('change', (e) => {
+            this.activeFilters.owner = e.target.value;
+            this.filterCameras();
+        });
+        document.getElementById('god-filter-network').addEventListener('change', (e) => {
+            this.activeFilters.network = e.target.value;
+            this.filterCameras();
+        });
+        document.getElementById('god-filter-purpose').addEventListener('change', (e) => {
+            this.activeFilters.purpose = e.target.value;
+            this.filterCameras();
+        });
 
         // Add camera button
         document.getElementById('god-add-camera-btn').addEventListener('click', () => {
@@ -170,6 +196,9 @@ class GodMode {
 
     populateTypeLists() {
         const types = [...new Set(this.cameras.map(c => c.type).filter(Boolean))].sort();
+        const owners = [...new Set(this.cameras.map(c => c.owner).filter(Boolean))].sort();
+        const networks = [...new Set(this.cameras.map(c => c.network).filter(Boolean))].sort();
+        const purposes = [...new Set(this.cameras.map(c => c.purpose).filter(Boolean))].sort();
 
         // Populate bulk delete dropdown
         const bulkTypeSelect = document.getElementById('god-bulk-type');
@@ -189,26 +218,68 @@ class GodMode {
             option.value = type;
             typeDatalist.appendChild(option);
         });
+
+        // Populate filter dropdowns
+        const filterTypeSelect = document.getElementById('god-filter-type');
+        filterTypeSelect.innerHTML = '<option value="">All Types</option>';
+        types.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type;
+            option.textContent = type;
+            filterTypeSelect.appendChild(option);
+        });
+
+        const filterOwnerSelect = document.getElementById('god-filter-owner');
+        filterOwnerSelect.innerHTML = '<option value="">All Owners</option>';
+        owners.forEach(owner => {
+            const option = document.createElement('option');
+            option.value = owner;
+            option.textContent = owner;
+            filterOwnerSelect.appendChild(option);
+        });
+
+        const filterNetworkSelect = document.getElementById('god-filter-network');
+        filterNetworkSelect.innerHTML = '<option value="">All Networks</option>';
+        networks.forEach(network => {
+            const option = document.createElement('option');
+            option.value = network;
+            option.textContent = network;
+            filterNetworkSelect.appendChild(option);
+        });
+
+        const filterPurposeSelect = document.getElementById('god-filter-purpose');
+        filterPurposeSelect.innerHTML = '<option value="">All Purposes</option>';
+        purposes.forEach(purpose => {
+            const option = document.createElement('option');
+            option.value = purpose;
+            option.textContent = purpose;
+            filterPurposeSelect.appendChild(option);
+        });
     }
 
     filterCameras() {
         const query = this.searchInput.value.toLowerCase();
 
-        if (!query) {
-            this.filteredCameras = [...this.cameras];
-        } else {
-            this.filteredCameras = this.cameras.filter(camera => {
-                return (
-                    camera.id?.toLowerCase().includes(query) ||
-                    camera.type?.toLowerCase().includes(query) ||
-                    camera.owner?.toLowerCase().includes(query) ||
-                    camera.location?.toLowerCase().includes(query) ||
-                    camera.suburb?.toLowerCase().includes(query) ||
-                    camera.network?.toLowerCase().includes(query) ||
-                    camera.purpose?.toLowerCase().includes(query)
-                );
-            });
-        }
+        this.filteredCameras = this.cameras.filter(camera => {
+            // Text search filter
+            const matchesSearch = !query || (
+                camera.id?.toLowerCase().includes(query) ||
+                camera.type?.toLowerCase().includes(query) ||
+                camera.owner?.toLowerCase().includes(query) ||
+                camera.location?.toLowerCase().includes(query) ||
+                camera.suburb?.toLowerCase().includes(query) ||
+                camera.network?.toLowerCase().includes(query) ||
+                camera.purpose?.toLowerCase().includes(query)
+            );
+
+            // Dropdown filters
+            const matchesType = !this.activeFilters.type || camera.type === this.activeFilters.type;
+            const matchesOwner = !this.activeFilters.owner || camera.owner === this.activeFilters.owner;
+            const matchesNetwork = !this.activeFilters.network || camera.network === this.activeFilters.network;
+            const matchesPurpose = !this.activeFilters.purpose || camera.purpose === this.activeFilters.purpose;
+
+            return matchesSearch && matchesType && matchesOwner && matchesNetwork && matchesPurpose;
+        });
 
         this.renderCameraList();
     }
