@@ -1,5 +1,5 @@
 // API Configuration
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://australian-surveillance-api.onrender.com/api';
 
 // Camera data - will be loaded from API
 let cameraData = [];

@@ -1,5 +1,5 @@
 // Admin panel JavaScript
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://australian-surveillance-api.onrender.com/api';
 let token = localStorage.getItem('godToken');
 let adminMap = null;
 let tempMarker = null;

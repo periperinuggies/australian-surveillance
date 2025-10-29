@@ -1,5 +1,5 @@
 // God Mode Modal Management
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://australian-surveillance-api.onrender.com/api';
 
 class GodMode {
     constructor() {
