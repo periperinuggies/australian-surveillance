@@ -1,8 +1,8 @@
-// Fix 1: Collapsible Sidebar for Mobile
+// Fix 1: Collapsible Sidebar for Desktop and Mobile
 function setupCollapsibleSidebar() {
     const sidebar = document.querySelector('.sidebar');
     const container = document.querySelector('.container');
-    
+
     // Create hamburger button
     const hamburger = document.createElement('button');
     hamburger.id = 'sidebar-toggle';
@@ -21,39 +21,70 @@ function setupCollapsibleSidebar() {
         cursor: pointer;
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         transition: all 0.3s;
-        display: none;
+        display: block;
     `;
-    
+
     // Add responsive styles
     const style = document.createElement('style');
     style.textContent = `
+        /* Desktop: sidebar slides left with transition */
+        .sidebar {
+            transition: transform 0.3s ease !important;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+
+        /* Mobile: sidebar positioned fixed and off-screen by default */
         @media (max-width: 768px) {
-            #sidebar-toggle { display: block !important; }
-            .sidebar { 
+            .sidebar {
                 position: fixed !important;
                 left: -320px !important;
                 top: 65px !important;
                 height: calc(100vh - 65px) !important;
                 transition: left 0.3s ease !important;
                 z-index: 9998 !important;
+                transform: none !important;
             }
-            .sidebar.open { left: 0 !important; }
+            .sidebar.open {
+                left: 0 !important;
+            }
+            .sidebar.hidden {
+                left: -320px !important;
+            }
         }
     `;
     document.head.appendChild(style);
     document.body.appendChild(hamburger);
-    
+
     // Toggle sidebar
     hamburger.addEventListener('click', () => {
-        sidebar.classList.toggle('open');
-        hamburger.textContent = sidebar.classList.contains('open') ? '✕' : '☰';
+        if (window.innerWidth <= 768) {
+            // Mobile behavior: use 'open' class
+            sidebar.classList.toggle('open');
+            hamburger.textContent = sidebar.classList.contains('open') ? '✕' : '☰';
+        } else {
+            // Desktop behavior: use 'hidden' class
+            sidebar.classList.toggle('hidden');
+            hamburger.textContent = sidebar.classList.contains('hidden') ? '☰' : '✕';
+        }
     });
-    
+
     // Close sidebar when clicking on map (mobile only)
     document.getElementById('map').addEventListener('click', () => {
         if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
             sidebar.classList.remove('open');
             hamburger.textContent = '☰';
+        }
+    });
+
+    // Handle window resize to clean up classes
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('open');
+        } else {
+            sidebar.classList.remove('hidden');
         }
     });
 }
