@@ -698,3 +698,34 @@ if (document.readyState === 'loading') {
 } else {
     init();
 }
+// Add this to the end of app.js to make filters collapsible
+
+// Setup collapsible filters
+function setupCollapsibleFilters() {
+    const filterHeaders = document.querySelectorAll('.filter-section h3');
+    
+    filterHeaders.forEach(header => {
+        // Skip Legend section
+        if (header.textContent.includes('Legend')) return;
+        
+        const targetId = header.getAttribute('data-target');
+        if (!targetId) return;
+        
+        const filterGroup = document.getElementById(targetId);
+        if (!filterGroup) return;
+        
+        header.addEventListener('click', () => {
+            filterGroup.classList.toggle('collapsed');
+            header.classList.toggle('collapsed');
+        });
+    });
+}
+
+// Call this after creating filters
+if (typeof init === 'function') {
+    const originalInit = init;
+    init = async function() {
+        await originalInit();
+        setupCollapsibleFilters();
+    };
+}
